@@ -9,6 +9,12 @@ mongo = PyMongo(app)
 
 products = mongo.db.products
 users = mongo.db.users
+@app.route('/')
+def get_routes():
+    routes = []
+    for rule in app.url_map.iter_rules():
+        routes.append(str(rule))
+    return jsonify({"Available Routes": routes})
 
 @app.route('/users', methods=['POST'])
 def register_user():
