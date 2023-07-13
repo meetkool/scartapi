@@ -1,14 +1,32 @@
-from flask import Flask, request, jsonify, session
-from flask_pymongo import PyMongo
+from flask import Flask, request, jsonify
+from flask_pymongo import PyMongo, DESCENDING
 import bcrypt
+from flask_jwt_extended import JWTManager, jwt_required, create_access_token
+from flask_cors import CORS
+from dotenv import load_dotenv
+from marshmallow import Schema, fields
+import os
+
+# Schema definition
+class UserSchema(Schema):
+  username = fields.Str(required=True)
+  password = fields.Str(required=True)
+
+# Load environment variables
+load_dotenv()
 
 app = Flask(__name__)
-app.secret_key = 'some-random-string'
-app.config["MONGO_URI"] = "mongodb+srv://kooljool:kooljool@cluster0xebia-scart.9eijce9.mongodb.net/scart"  
-mongo = PyMongo(app)
+CORS(app)  # Enable CORS for all routes
 
-products = mongo.db.products
+app.config["MONGO_URI"] = os.getenv("MONGO_URI")
+app.config["JWT_SECRET_KEY"] = os.getenv("SECRET_KEY")
+
+mongo = PyMongo(app)
+jwt = JWTManager(app)
+
 users = mongo.db.users
+products = mongo.db.products
+
 @app.route('/')
 def get_routes():
     routes = []
@@ -18,11 +36,17 @@ def get_routes():
 
 @app.route('/users', methods=['POST'])
 def register_user():
-  username = request.json['username']
-  password = request.json['password']
+  """Registers a new user"""
+  data = UserSchema().load(request.json)
 
+  if data.errors:
+    return jsonify(data.errors), 400
+
+  username = data.data['username']
+  password = data.data['password']
+  
   user = users.find_one({'username': username})
-
+  
   if user:
     return jsonify({'message': 'User already exists'}), 400
 
@@ -33,32 +57,32 @@ def register_user():
     'password': hashed
   })
   
-  return jsonify({'message': 'User created'})
-
+  return jsonify({'message': 'User created'}), 201
 
 @app.route('/login', methods=['POST'])
 def login_user():
-  username = request.json['username']
-  password = request.json['password']
-  
-  user = users.find_one({ 'username': username })
-  
-  if user and bcrypt.checkpw(password.encode('utf-8'), user['password']):
-    session['username'] = username
-    return jsonify({'message': 'Login successful'})
-  
-  return jsonify({'message': 'Invalid credentials'})
+  """Logs in a user"""
+  data = UserSchema().load(request.json)
 
-@app.route('/logout')
-def logout():
-  session.pop('username', None)
-  return jsonify({'message': 'Logged out'})
+  if data.errors:
+    return jsonify(data.errors), 400
+
+  username = data.data['username']
+  password = data.data['password']
+
+  user = users.find_one({ 'username': username })
+
+  if user and bcrypt.checkpw(password.encode('utf-8'), user['password']):
+    access_token = create_access_token(identity=username)
+    return jsonify(access_token=access_token)
+
+  return jsonify({'message': 'Invalid credentials'}), 400
 
 @app.route('/products', methods=['POST'])
+@jwt_required
 def add_product():
-  if 'username' not in session:
-    return jsonify({'message': 'Unauthorized'})
-    
+  """Adds a new product"""
+  # Only a logged-in user can add a product
   title = request.json['title']
   brand = request.json['brand']
   price = request.json['price']
@@ -71,10 +95,11 @@ def add_product():
     'color': color  
   })
 
-  return jsonify({'message': 'Product added'}) 
+  return jsonify({'message': 'Product added'}), 201 
 
 @app.route('/products', methods=['GET'])
 def get_products():
+  """Get all products"""
   output = []
 
   for product in products.find():
@@ -87,9 +112,9 @@ def get_products():
 
   return jsonify({'products': output})
 
-
 @app.route('/products/search')
 def search_products():
+  """Searches for products based on a query"""
   query = request.args.get('query')
   
   output = []
@@ -107,9 +132,9 @@ def search_products():
 
   return jsonify({'products': output})
 
-
 @app.route('/filters')
 def get_filters():
+  """Gets distinct brands, colors, and prices"""
   brands = products.distinct('brand')
   colors = products.distinct('color')
   prices = products.distinct('price')
@@ -121,4 +146,4 @@ def get_filters():
   })
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000)
+  app.run(host='0.0.0.0', port=5000)
