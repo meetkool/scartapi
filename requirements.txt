@@ -5,3 +5,4 @@ flask_restful==0.3.8
 marshmallow==3.10.0
 python-dotenv==0.15.0
 jinja2==2.10.1
+markupsafe==1.1.1
