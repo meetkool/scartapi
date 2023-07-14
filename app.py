@@ -160,23 +160,55 @@ def delete_product(product_id):
 
 
 
-@app.route('/filters')
-def get_filters():
-  titles = products.distinct('title')
-  brands = products.distinct('brand')
-  colors = products.distinct('color')
-  prices = products.distinct('price')
-  images = products.distinct('image')    # new field
-  discounts = products.distinct('discount')    # new field
+@app.route('/filter', methods=['GET'])
+def filter_products():
+    query_params = request.args
+    query = {}
 
-  return jsonify({
-    'titles': titles,
-    'brands': brands,
-    'colors': colors,
-    'prices': prices,
-    'images': images,    # new field
-    'discounts': discounts    # new field
-  })
+    if 'title' in query_params:
+        query['title'] = query_params['title']
+
+    if 'brand' in query_params:
+        query['brand'] = query_params['brand']
+
+    if 'color' in query_params:
+        query['color'] = query_params['color']
+    
+    if 'price' in query_params:
+        query['price'] = float(query_params['price'])
+
+    if 'image' in query_params:
+        query['image'] = query_params['image']
+
+    if 'discount' in query_params:
+        query['discount'] = float(query_params['discount'])
+
+    products_cursor = products.find(query)
+    products_list = list(products_cursor)
+  
+    if not products_list:
+        return jsonify({'message': 'No product matches the filters'}), 404
+
+    output = []
+  
+    for product in products_list:
+        output.append({
+            'title': product['title'],
+            'brand': product['brand'],
+            'price': product['price'],
+            'color': product['color'],
+            'image': product['image'],
+            'discount': product['discount']
+        })
+
+    return jsonify({'products': output})
+
+        
+    if not output:
+        return jsonify({'message': 'No product matches the filters'}), 404
+
+    return jsonify({'products': output})
+
 
 
 if __name__ == '__main__':
