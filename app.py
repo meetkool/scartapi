@@ -1,10 +1,10 @@
-from flask import Flask, request, jsonify, session, url_for
+from flask import Flask, request, jsonify, session
 from flask_pymongo import PyMongo
 import bcrypt
 
 app = Flask(__name__)
 app.secret_key = 'some-random-string'
-app.config["MONGO_URI"] = "mongodb+srv://kooljool:kooljool@cluster0xebia-scart.9eijce9.mongodb.net/scart"
+app.config["MONGO_URI"] = "mongodb+srv://kooljool:kooljool@cluster0xebia-scart.9eijce9.mongodb.net/scart"  
 mongo = PyMongo(app)
 
 products = mongo.db.products
