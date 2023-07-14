@@ -8,7 +8,14 @@ WORKDIR /app
 COPY . /app
 
 # Install any needed packages specified in requirements.txt
-RUN pip install --no-cache-dir -r requirements.txt
+RUN pip install pymongo>=3.11.0 && \
+    pip install flask_cors>=3.0.10 && \
+    pip install MarkupSafe==1.1.1 && \
+    pip install Flask>=2.0.1 && \
+    pip install itsdangerous>=2.0.1 && \
+    pip install flask_pymongo>=2.3.0 && \
+    pip install bcrypt>=3.2.0
+
 
 # Make port 5000 available to the world outside this container
 EXPOSE 5000
