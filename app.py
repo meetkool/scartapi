@@ -2,8 +2,11 @@ from flask import Flask, request, jsonify, session
 from flask_pymongo import PyMongo
 import bcrypt
 from bson.objectid import ObjectId   
+from flask_cors import CORS  # new line
+
 
 app = Flask(__name__)
+CORS(app) 
 app.secret_key = 'some-random-string'
 app.config["MONGO_URI"] = "mongodb+srv://kooljool:kooljool@cluster0xebia-scart.9eijce9.mongodb.net/scart"  
 mongo = PyMongo(app)
