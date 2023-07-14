@@ -1,16 +1,10 @@
 from flask import Flask, request, jsonify, session
 from flask_pymongo import PyMongo
-from bson.json_util import dumps
-from dotenv import load_dotenv
 import bcrypt
-import os
-
-# Load the environment variables file
-load_dotenv()
 
 app = Flask(__name__)
-app.secret_key = os.getenv('SECRET_KEY')
-app.config["MONGO_URI"] = os.getenv('MONGO_URI')
+app.secret_key = 'some-random-string'
+app.config["MONGO_URI"] = "mongodb+srv://kooljool:kooljool@cluster0xebia-scart.9eijce9.mongodb.net/scart"  
 mongo = PyMongo(app)
 
 products = mongo.db.products
@@ -18,112 +12,107 @@ users = mongo.db.users
 
 @app.route('/users', methods=['POST'])
 def register_user():
-    try:
-        data = request.get_json()
-        username = data['username']
-        password = data['password']
+  username = request.json['username']
+  password = request.json['password']
 
-        user = users.find_one({'username': username})
+  user = users.find_one({'username': username})
 
-        if user:
-            return jsonify({'message': 'User already exists'}), 400
+  if user:
+    return jsonify({'message': 'User already exists'}), 400
 
-        hashed = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt())
+  hashed = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt())
+  
+  users.insert_one({
+    'username': username, 
+    'password': hashed
+  })
+  
+  return jsonify({'message': 'User created'})
 
-        users.insert_one({
-            'username': username,
-            'password': hashed
-        })
-
-        return jsonify({'message': 'User created'})
-    except Exception as e:
-        return jsonify(str(e))
 
 @app.route('/login', methods=['POST'])
 def login_user():
-    try:
-        data = request.get_json()
-        username = data['username']
-        password = data['password']
-
-        user = users.find_one({'username': username})
-
-        if user and bcrypt.checkpw(password.encode('utf-8'), user['password']):
-            session['username'] = username
-            return jsonify({'message': 'Login successful'})
-
-        return jsonify({'message': 'Invalid credentials'})
-    except Exception as e:
-        return jsonify(str(e))
+  username = request.json['username']
+  password = request.json['password']
+  
+  user = users.find_one({ 'username': username })
+  
+  if user and bcrypt.checkpw(password.encode('utf-8'), user['password']):
+    session['username'] = username
+    return jsonify({'message': 'Login successful'})
+  
+  return jsonify({'message': 'Invalid credentials'})
 
 @app.route('/logout')
 def logout():
-    session.pop('username', None)
-    return jsonify({'message': 'Logged out'})
+  session.pop('username', None)
+  return jsonify({'message': 'Logged out'})
 
 @app.route('/products', methods=['POST'])
 def add_product():
-    try:
-        if 'username' not in session:
-            return jsonify({'message': 'Unauthorized'})
+  if 'username' not in session:
+    return jsonify({'message': 'Unauthorized'})
+    
+  title = request.json['title']
+  brand = request.json['brand']
+  price = request.json['price']
+  color = request.json['color']
 
-        data = request.get_json()
-        title = data['title']
-        brand = data['brand']
-        price = data['price']
-        color = data['color']
+  products.insert_one({
+    'title': title,
+    'brand': brand,
+    'price': price,
+    'color': color  
+  })
 
-        products.insert_one({
-            'title': title,
-            'brand': brand,
-            'price': price,
-            'color': color
-        })
-
-        return jsonify({'message': 'Product added'})
-    except Exception as e:
-        return jsonify(str(e))
+  return jsonify({'message': 'Product added'}) 
 
 @app.route('/products', methods=['GET'])
 def get_products():
-    try:
-        products_list = []
-        for product in products.find():
-            products_list.append(product)
-        return dumps(products_list)
-    except Exception as e:
-        return jsonify(str(e))
+  output = []
+
+  for product in products.find():
+    output.append({
+      'title': product['title'],
+      'brand': product['brand'],
+      'price': product['price'],
+      'color': product['color']  
+    })
+
+  return jsonify({'products': output})
+
 
 @app.route('/products/search')
 def search_products():
-    try:
-        query = request.args.get('query')
+  query = request.args.get('query')
+  
+  output = []
+  
+  for product in products.find({'title': query}):
+    output.append({
+      'title': product['title'],
+      'brand': product['brand'],
+      'price': product['price'],
+      'color': product['color']
+    })
 
-        result = products.find({'$text': {'$search': query}})
+  if not output:
+    return jsonify({'message': 'Product does not exist'}), 404
 
-        output = [prod for prod in result]
+  return jsonify({'products': output})
 
-        if not output:
-            return jsonify({'message': 'Product does not exist'}), 404
-
-        return dumps(output)
-    except Exception as e:
-        return jsonify(str(e))
 
 @app.route('/filters')
 def get_filters():
-    try:
-        brands = products.distinct('brand')
-        colors = products.distinct('color')
-        prices = products.distinct('price')
+  brands = products.distinct('brand')
+  colors = products.distinct('color')
+  prices = products.distinct('price')
 
-        return jsonify({
-            'brands': brands,
-            'colors': colors,
-            'prices': prices
-        })
-    except Exception as e:
-        return jsonify(str(e))
+  return jsonify({
+    'brands': brands,
+    'colors': colors,
+    'prices': prices  
+  })
 
 if __name__ == '__main__':
     app.run(debug=True)
