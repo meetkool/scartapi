@@ -1,6 +1,7 @@
 from flask import Flask, request, jsonify, session
 from flask_pymongo import PyMongo
 import bcrypt
+from bson.objectid import ObjectId   
 
 app = Flask(__name__)
 app.secret_key = 'some-random-string'
@@ -55,24 +56,35 @@ def logout():
   session.pop('username', None)
   return jsonify({'message': 'Logged out'})
 
+
 @app.route('/products', methods=['POST'])
 def add_product():
   if 'username' not in session:
     return jsonify({'message': 'Unauthorized'})
-
+    
   title = request.json['title']
   brand = request.json['brand']
   price = request.json['price']
   color = request.json['color']
+  image = request.json['image']
+  discount = request.json['discount']
+
+  existing_product = products.find_one({'title': title})
+
+  if existing_product:
+    return jsonify({'message': 'Product with this title already exists. Please change the title.'}), 400
 
   products.insert_one({
     'title': title,
     'brand': brand,
     'price': price,
-    'color': color  
+    'color': color,
+    'image': image,
+    'discount': discount
   })
 
   return jsonify({'message': 'Product added'}) 
+
 
 @app.route('/products', methods=['GET'])
 def get_products():
@@ -80,14 +92,16 @@ def get_products():
 
   for product in products.find():
     output.append({
+      'id': str(product['_id']),    # added line
       'title': product['title'],
       'brand': product['brand'],
       'price': product['price'],
-      'color': product['color']  
+      'color': product['color'],
+      'image': product['image'],
+      'discount': product['discount']
     })
 
   return jsonify({'products': output})
-
 
 @app.route('/products/search')
 def search_products():
@@ -97,16 +111,50 @@ def search_products():
 
   for product in products.find({'title': query}):
     output.append({
+      'id': str(product['_id']),    # added line
       'title': product['title'],
       'brand': product['brand'],
       'price': product['price'],
-      'color': product['color']
+      'color': product['color'],
+      'image': product['image'],
+      'discount': product['discount']
     })
 
   if not output:
     return jsonify({'message': 'Product does not exist'}), 404
 
   return jsonify({'products': output})
+
+@app.route('/products/<product_id>', methods=['GET'])
+def get_product(product_id):
+  product = products.find_one({'_id': ObjectId(product_id)})
+
+  if product:
+    output = {
+      'title': product['title'],
+      'brand': product['brand'],
+      'price': product['price'],
+      'color': product['color'],
+      'image': product['image'],    # new field
+      'discount': product['discount']    # new field
+    }
+    return jsonify({'product': output})
+  else:
+    return jsonify({'message': 'Product not found'}), 404
+
+
+@app.route('/products/delete/<product_id>', methods=['DELETE'])
+def delete_product(product_id):
+  if 'username' not in session:
+    return jsonify({'message': 'Unauthorized'})
+
+  result = products.delete_one({'_id': ObjectId(product_id)})
+
+  if result.deleted_count == 1:
+    return jsonify({'message': 'Product deleted'})
+  else:
+    return jsonify({'message': 'Product not found'}), 404
+
 
 
 @app.route('/filters')
