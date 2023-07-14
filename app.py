@@ -28,12 +28,12 @@ def register_user():
     return jsonify({'message': 'User already exists'}), 400
 
   hashed = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt())
-  
+
   users.insert_one({
     'username': username, 
     'password': hashed
   })
-  
+
   return jsonify({'message': 'User created'})
 
 
@@ -41,13 +41,13 @@ def register_user():
 def login_user():
   username = request.json['username']
   password = request.json['password']
-  
+
   user = users.find_one({ 'username': username })
-  
+
   if user and bcrypt.checkpw(password.encode('utf-8'), user['password']):
     session['username'] = username
     return jsonify({'message': 'Login successful'})
-  
+
   return jsonify({'message': 'Invalid credentials'})
 
 @app.route('/logout')
@@ -59,7 +59,7 @@ def logout():
 def add_product():
   if 'username' not in session:
     return jsonify({'message': 'Unauthorized'})
-    
+
   title = request.json['title']
   brand = request.json['brand']
   price = request.json['price']
@@ -92,9 +92,9 @@ def get_products():
 @app.route('/products/search')
 def search_products():
   query = request.args.get('query')
-  
+
   output = []
-  
+
   for product in products.find({'title': query}):
     output.append({
       'title': product['title'],
@@ -122,4 +122,4 @@ def get_filters():
   })
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(host='0.0.0.0', port=5000)
