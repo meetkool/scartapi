@@ -162,15 +162,22 @@ def delete_product(product_id):
 
 @app.route('/filters')
 def get_filters():
+  titles = products.distinct('title')
   brands = products.distinct('brand')
   colors = products.distinct('color')
   prices = products.distinct('price')
+  images = products.distinct('image')    # new field
+  discounts = products.distinct('discount')    # new field
 
   return jsonify({
+    'titles': titles,
     'brands': brands,
     'colors': colors,
-    'prices': prices  
+    'prices': prices,
+    'images': images,    # new field
+    'discounts': discounts    # new field
   })
+
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000)
