@@ -108,25 +108,28 @@ def get_products():
 
 @app.route('/products/search')
 def search_products():
-  query = request.args.get('query')
+    query = request.args.get('query')
 
-  output = []
+    output = []
 
-  for product in products.find({'title': query}):
-    output.append({
-      'id': str(product['_id']),    # added line
-      'title': product['title'],
-      'brand': product['brand'],
-      'price': product['price'],
-      'color': product['color'],
-      'image': product['image'],
-      'discount': product['discount']
-    })
+    # use the $regex operator for a 'starts with' search
+    for product in products.find({'title': {'$regex': f'^{query}', '$options' :'i'}}):
+        output.append({
+            'id': str(product['_id']),    # added line
+            'title': product['title'],
+            'brand': product['brand'],
+            'price': product['price'],
+            'color': product['color'],
+            'image': product['image'],
+            'discount': product['discount']
+        })
 
-  if not output:
-    return jsonify({'message': 'Product does not exist'}), 404
+    if len(output) == 0:
+        return jsonify({'message': 'No products found', 'products': []}), 200
 
-  return jsonify({'products': output})
+    return jsonify({'message': 'Products found', 'products': output}), 200
+
+
 
 @app.route('/products/<product_id>', methods=['GET'])
 def get_product(product_id):
@@ -174,8 +177,12 @@ def filter_products():
     if 'color' in query_params:
         query['color'] = query_params['color']
     
-    if 'price' in query_params:
-        query['price'] = float(query_params['price'])
+    if 'min_price' in query_params and 'max_price' in query_params:
+        query['price'] = {'$gte': float(query_params['min_price']), '$lte': float(query_params['max_price'])}
+    elif 'min_price' in query_params:
+        query['price'] = {'$gte': float(query_params['min_price'])}
+    elif 'max_price' in query_params:
+        query['price'] = {'$lte': float(query_params['max_price'])}
 
     if 'image' in query_params:
         query['image'] = query_params['image']
@@ -203,11 +210,7 @@ def filter_products():
 
     return jsonify({'products': output})
 
-        
-    if not output:
-        return jsonify({'message': 'No product matches the filters'}), 404
 
-    return jsonify({'products': output})
 
 
 
