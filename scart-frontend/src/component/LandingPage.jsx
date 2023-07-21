@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useCallback } from "react";
 import axios from "axios";
 import './App.css';
-import { Link } from 'react-router-dom';
 
 function LandingPage() {
   const [products, setProducts] = useState([]);
@@ -16,11 +15,11 @@ function LandingPage() {
     try {
       let response;
       if (searchQuery) {
-        response = await axios.get("https://scart-xebia.onrender.com/products/search", { params: { query: searchQuery } });
+        response = await axios.get("http://127.0.0.1:5000/products/search", { params: { query: searchQuery } });
       } else if (Object.keys(filter).length !== 0) {
-        response = await axios.get("https://scart-xebia.onrender.com/filter", { params: { min_price: priceRange.min, max_price: priceRange.max, min_discount: discountRange.min, max_discount: discountRange.max } });
+        response = await axios.get("http://127.0.0.1:5000/filter", { params: { min_price: priceRange.min, max_price: priceRange.max, min_discount: discountRange.min, max_discount: discountRange.max } });
       } else {
-        response = await axios.get("https://scart-xebia.onrender.com/products");
+        response = await axios.get("http://127.0.0.1:5000/products");
       }
       setProducts(response.data.products);
       const uniqueBrands = [...new Set(response.data.products.map(product => product.brand))];
@@ -213,21 +212,19 @@ const handleFilterChange = (e) => {
           </div>
           <h2>Products</h2>
           <div className="products-grid">
-  {filteredProducts.map((product) => (
-    <Link to={`/products/${product.id}`} key={product.id}>
-      <div key={product.id} className="product-card" style={{ backgroundColor: product.color }}>
-        <div className="product-image-container">
-          <img src={product.image} alt={product.title} className="product-image" />
-          <div className="product-discount">{product.discount}%</div>
-        </div>
-        <h3 className="product-title">{product.title}</h3>
-        <p className="product-brand">Brand: {product.brand}</p>
-        <p className="product-price">Price: {product.price}</p>
-        <p className="product-color">Color: {product.color}</p>
-      </div>
-    </Link>
-  ))}
-</div>
+            {filteredProducts.map((product) => (
+              <div key={product._id} className="product-card" style={{ backgroundColor: product.color }}>
+                <div className="product-image-container">
+                  <img src={product.image} alt={product.title} className="product-image" />
+                  <div className="product-discount">{product.discount}%</div>
+                </div>
+                <h3 className="product-title">{product.title}</h3>
+                <p className="product-brand">Brand: {product.brand}</p>
+                <p className="product-price">Price: {product.price}</p>
+                <p className="product-color">Color: {product.color}</p>
+              </div>
+            ))}
+          </div>
         </div>
         
       </div>
