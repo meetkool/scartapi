@@ -1,10 +1,7 @@
-pymongo==3.11.0
-flask_cors==3.0.10
-MarkupSafe==1.1.1
-Flask==2.0.1
-itsdangerous==2.0.1
-flask_pymongo==2.3.0
+flask==1.1.2
+flask-restx==0.2.0
+flask-pymongo==2.3.0
+flask-cors==3.0.9
 bcrypt==3.2.0
-flask_restx
-
-
+pymongo[srv]==3.11.3
+bson==0.5.10
