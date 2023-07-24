@@ -2,7 +2,18 @@ import React, { useState, useEffect, useCallback } from "react";
 import axios from "axios";
 import './App.css';
 
+
+
+
+import Container from 'react-bootstrap/Container';
+import Form from 'react-bootstrap/Form';
+import Nav from 'react-bootstrap/Nav';
+import Navbar from 'react-bootstrap/Navbar';
+import { FaShoppingCart } from "react-icons/fa";
+
+
 function LandingPage() {
+
   const [products, setProducts] = useState([]);
   const [filter, setFilter] = useState({});
   const [brands, setBrands] = useState([]);
@@ -119,10 +130,49 @@ const handleFilterChange = (e) => {
   });
 
   return (
+   
+    
     <div className="App">
-      <h1>Welcome to Our Store</h1>
+    <Navbar expand="lg" className="bg-body-tertiary">
+        <Container fluid>
+          <Navbar.Brand className='pt-2 pb-2 ps-2 pe-2 fs-1 text-info '   href="#">sCart</Navbar.Brand>
+          <Navbar.Toggle className='pe-3' aria-controls="navbarScroll" />
+          <Navbar.Collapse id="navbarScroll">
+            <Nav
+              className="me-auto my-2 my-lg-0"
+              style={{ maxHeight: '100px' }}
+              navbarScroll
+            >
+              <Nav.Link className='pe-1 ps-1' href="#action1">Home</Nav.Link>
+              <Nav.Link href="#action2">Products</Nav.Link>
+            </Nav>
+            <Form className="d-flex container-fluid ps-1 pe-1 ">
+              <Form.Control
+                type="search"
+                placeholder="Search"
+                className="me-2"
+                aria-label="Search"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+              />
+              
+            </Form>
+            <Nav
+              className="my-2 my-lg-0"
+              style={{ maxHeight: '100px' }}
+              navbarScroll
+            >
+              <Nav.Link href="#action1">
+              <FaShoppingCart />
+              </Nav.Link>
+              
+            </Nav>
+          </Navbar.Collapse>
+        </Container>
+      </Navbar>
+      
   
-      <div className="layout">
+      <div className="layout pt-4 pe-4 ps-4" >
   
         <div className="sidebar">
           <form onSubmit={e => e.preventDefault()}>
@@ -201,14 +251,7 @@ const handleFilterChange = (e) => {
   
         <div className="main-content">
           <div className="search-bar">
-            <label>
-              Search:
-              <input
-                type="text"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-              />
-            </label>
+            
           </div>
           <h2>Products</h2>
           <div className="products-grid">
