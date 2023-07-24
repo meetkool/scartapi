@@ -4,6 +4,7 @@ import ProductDetail from './component/ProductDetail';
 import Header from './component/Header';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import "./App.css";
+import Foooter from './component/Foooter';
 
 function App() {
   return (
@@ -13,6 +14,7 @@ function App() {
         <Route path="/products/:id" element={<ProductDetail />} />
         <Route path="/" element={<LandingPage />} />
       </Routes>
+      <Foooter />
     </Router>
   );
 }
