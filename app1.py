@@ -1,5 +1,6 @@
 from flask import Flask, session
-from flask_restx import Api, Resource
+from flask_restx import Api, Resource, fields
+from flask_restx import reqparse
 from flask_pymongo import PyMongo
 from flask import request
 import bcrypt
@@ -19,6 +20,24 @@ mongo = PyMongo(app)
 products = mongo.db.products
 users = mongo.db.users
 
+login_model = api.model('Login', {
+'username': fields.String,
+'password': fields.String
+})
+
+user_model = api.model('UserRegistration', {
+'username': fields.String,
+'password': fields.String
+})
+
+product_model = api.model('Product', {
+'title': fields.String,
+'brand': fields.String,
+'price': fields.Float,
+'color': fields.String,
+'image': fields.String,
+'discount': fields.Float,
+})
 
 @api.route('/')
 class Home(Resource):
@@ -31,6 +50,7 @@ class Home(Resource):
 
 @api.route('/users')
 class UserRegistration(Resource):
+    @api.expect(user_model)
     def post(self):
         username = api.payload['username']
         password = api.payload['password']
@@ -49,6 +69,7 @@ class UserRegistration(Resource):
 
 @api.route('/login')
 class UserLogin(Resource):
+    @api.expect(login_model)
     def post(self):
         username = api.payload['username']
         password = api.payload['password']
@@ -71,6 +92,7 @@ class LogoutUser(Resource):
 
 @api.route('/products')
 class Products(Resource):
+    @api.expect(product_model)
     def post(self):
         if 'username' not in session:
             return {'message': 'Unauthorized'}, 401
@@ -115,10 +137,16 @@ class Products(Resource):
         return {'products': output}
 
 
+parser = reqparse.RequestParser()
+# adding arguments to the parser instance
+parser.add_argument('query', type=str, help='Search query', required=True)
+
 @api.route('/products/search')
 class SearchProducts(Resource):
+    @api.expect(parser)
     def get(self):
-        query = request.args.get('query')
+        args = parser.parse_args()
+        query = args['query']
 
         output = []
 
