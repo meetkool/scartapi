@@ -14,7 +14,7 @@ RUN pip install pymongo>=3.11.0 && \
     pip install Flask>=2.0.1 && \
     pip install itsdangerous>=2.0.1 && \
     pip install flask_pymongo>=2.3.0 && \
-    pip install bcrypt>=3.2.0
+    pip install bcrypt>=3.2.0\
     pip install flask-restx>=1.1.0
 
 
