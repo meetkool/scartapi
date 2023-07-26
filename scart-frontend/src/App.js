@@ -1,24 +1,34 @@
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import React from 'react';
+import { BrowserRouter as Router, Routes, Route, useNavigate } from 'react-router-dom';
 import LandingPage from './component/LandingPage';
-import ProductDetail from './component/ProductDetail';
-
-import 'bootstrap/dist/css/bootstrap.min.css';
-import "./App.css";
-import Foooter from './component/Foooter';
 import Login from './Login';
 
 function App() {
   return (
     <Router>
-    
       <Routes>
-        <Route path="/products/:id" element={<ProductDetail />} />
-        <Route path="/" element={<LandingPage />} />
+        <Route path="/" element={<Home />} />
         <Route path="/login" element={<Login />} />
+        <Route path="/landing" element={<LandingPage />} />
       </Routes>
-      <Foooter />
     </Router>
   );
+}
+
+function Home() {
+  const navigate = useNavigate();
+  const user = JSON.parse(localStorage.getItem("user"));
+
+  React.useEffect(() => {
+    if (!user) {
+      navigate("/login");
+    } else {
+      navigate("/landing");
+    }
+  }, [user, navigate]);
+
+  // This component does not render anything
+  return null;
 }
 
 export default App;

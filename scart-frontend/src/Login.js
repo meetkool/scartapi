@@ -1,33 +1,46 @@
-import React from 'react'
+import React, { useState } from "react";
+import axios from "axios";
+import { useNavigate } from "react-router-dom";
 
-const Login = () => {
+function Login() {
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
+  const navigate = useNavigate();
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      const response = await axios.get(
+        `http://127.0.0.1:10000/login?username=${username}&password=${password}`
+      );
+      localStorage.setItem("user", JSON.stringify(response.data));
+      navigate("/");
+    } catch (error) {
+      console.error("Failed to login user", error);
+    }
+  };
+  
+
   return (
-    <div className='login template d-flex justify-content-center align-items-center 100-w vh-100 bg-primary '>
-        <div className='40-w p-5 rounded bg-white'>
-           <form>
-            <h3>Log In</h3>
-            <div className='mb-2'>
-                <label htmlFor="email">Email</label>
-                <input type="email" placeholder='Enter Email' className='form-control'/>
-            </div>
-            <div className='mb-2'>
-                <label htmlFor="password">Password</label>
-                <input type="password" placeholder='Enter Password' className='form-control'/>
-            </div>
-            <div className='mb-2'>
-                <input type="checkbox" className='custom-control custom-checkbox' id='check'/>
-                <label htmlFor="check" className='custom-input-label'>
-                    Remember Me
-                </label>
-            </div>
-            <div className='d-grid'>
-                 <button className='btn btn-primary'>Log In</button>
-            </div>
-            
-           </form>
-        </div>  
+    <div>
+      <h2>Login</h2>
+      <form onSubmit={handleSubmit}>
+        <input
+          type="text"
+          value={username}
+          onChange={(e) => setUsername(e.target.value)}
+          placeholder="Username"
+        />
+        <input
+          type="password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          placeholder="Password"
+        />
+        <button type="submit">Login</button>
+      </form>
     </div>
-  )
+  );
 }
 
-export default Login
+export default Login;

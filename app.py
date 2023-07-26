@@ -6,8 +6,14 @@ from flask import request
 import bcrypt
 from bson.objectid import ObjectId
 from flask_cors import CORS  
+from flask import Flask, request, jsonify
+from flask_restful import Resource, Api
+from flask_bcrypt import Bcrypt
+from flask_restx import Api, Resource, fields
+from flask_restx import reqparse
 
 app = Flask(__name__)
+bcrypt = Bcrypt(app)
 api = Api(app)
 
 CORS(app)
@@ -66,7 +72,6 @@ class UserRegistration(Resource):
 
         return {'message': 'User created successfully'}
 
-
 @api.route('/login')
 class UserLogin(Resource):
     @api.expect(login_model)
@@ -76,11 +81,15 @@ class UserLogin(Resource):
 
         user = users.find_one({'username': username})
 
-        if user and bcrypt.checkpw(password.encode('utf-8'), user['password']):
+        if user and bcrypt.check_password_hash(user['password'], password):
             session['username'] = username
             return {'message': 'Login successful'}
         else:
-            return {'message': 'Invalid credentials'}
+            return {'message': 'Invalid credentials'}, 401
+        # except Exception as e:
+        #     app.logger.error(f"Exception occurred: {e}")
+        #     return {'message': 'Internal Server Error'}, 500
+
 
 
 
