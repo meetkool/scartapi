@@ -70,9 +70,9 @@ class UserRegistration(Resource):
 @api.route('/login')
 class UserLogin(Resource):
     @api.expect(login_model)
-    def post(self):
-        username = api.payload['username']
-        password = api.payload['password']
+    def get(self):
+        username = request.args.get('username')
+        password = request.args.get('password')
 
         user = users.find_one({'username': username})
 
@@ -81,6 +81,7 @@ class UserLogin(Resource):
             return {'message': 'Login successful'}
         else:
             return {'message': 'Invalid credentials'}
+
 
 
 @api.route('/logout')
