@@ -15,7 +15,8 @@ RUN pip install pymongo>=3.11.0 \
     itsdangerous>=2.0.1 \
     flask_pymongo>=2.3.0 \
     bcrypt>=3.2.0\
-    flask-restx>=1.1.0
+    flask-restx>=1.1.0\
+    flask_bcrypt
 
 # Make port 10000 available to the world outside this container
 EXPOSE 10000
