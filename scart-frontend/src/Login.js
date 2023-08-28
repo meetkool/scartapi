@@ -12,7 +12,7 @@ function Login() {
     e.preventDefault();
     try {
       const response = await axios.get(
-        `http://127.0.0.1:10000/login?username=${username}&password=${password}`
+        `https://scart-xebia.onrender.com/login?username=${username}&password=${password}`
       );
       localStorage.setItem("user", JSON.stringify(response.data));
       navigate("/");
