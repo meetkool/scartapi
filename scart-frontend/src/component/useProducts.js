@@ -12,11 +12,11 @@ export default function useProducts(searchQuery, filter) {
     try {
       let response;
       if (searchQuery) {
-        response = await axios.get("https://scart-xebia.onrender.com/products/search", { params: { query: searchQuery } });
+        response = await axios.get("http://localhost:10000/products/search", { params: { query: searchQuery } });
       } else if (Object.keys(filter).length !== 0) {
-        response = await axios.get("https://scart-xebia.onrender.com/filter", { params: { min_price: priceRange.min, max_price: priceRange.max, min_discount: discountRange.min, max_discount: discountRange.max } });
+        response = await axios.get("http://localhost:10000/filter", { params: { min_price: priceRange.min, max_price: priceRange.max, min_discount: discountRange.min, max_discount: discountRange.max } });
       } else {
-        response = await axios.get("https://scart-xebia.onrender.com/products");
+        response = await axios.get("http://localhost:10000/products");
       }
       setProducts(response.data.products);
       const uniqueBrands = [...new Set(response.data.products.map(product => product.brand))];

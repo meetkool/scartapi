@@ -4,7 +4,7 @@ import Nav from 'react-bootstrap/Nav';
 import Form from 'react-bootstrap/Form';
 import { FaShoppingCart } from 'react-icons/fa';
 import Container from 'react-bootstrap/Container';
-
+import Logout from './Logout'; // import the Logout component
 
 const Header = ({ searchQuery, setSearchQuery }) => {
   return (
@@ -35,6 +35,7 @@ const Header = ({ searchQuery, setSearchQuery }) => {
             <Nav.Link href="#action1">
               <FaShoppingCart />
             </Nav.Link>
+            <Logout /> {/* add the Logout button here */}
           </Nav>
         </Navbar.Collapse>
       </Container>

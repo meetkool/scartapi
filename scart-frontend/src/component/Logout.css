@@ -1,0 +1,11 @@
+/* Logout.css */
+.Logout-button {
+    display: inline-block;
+    padding: 10px 20px;
+    background-color: red;
+    color: white;
+    text-align: center;
+    text-decoration: none;
+    cursor: pointer;
+  }
+  

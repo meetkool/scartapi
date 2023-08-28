@@ -16,7 +16,7 @@ function LandingPage() {
   const {filteredProducts, brands, colors, priceRange, discountRange } = useProducts(searchQuery, filter);
 
   return (
-        <div className="App">
+    <div className="App">
       <Header searchQuery={searchQuery} setSearchQuery={setSearchQuery} />
       <br/>
       <div className="layout">

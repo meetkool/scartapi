@@ -1,22 +1,20 @@
-from flask import Flask, session
-from flask_restx import Api, Resource, fields
-from flask_restx import reqparse
+from flask import Flask, session, request, jsonify
+from flask_restx import Api, Resource, fields, reqparse
 from flask_pymongo import PyMongo
-from flask import request
 import bcrypt
 from bson.objectid import ObjectId
 from flask_cors import CORS  
-from flask import Flask, request, jsonify
-from flask_restful import Resource, Api
 from flask_bcrypt import Bcrypt
-from flask_restx import Api, Resource, fields
-from flask_restx import reqparse
+from Crypto.Cipher import AES
+from Crypto.Random import get_random_bytes
+
 
 app = Flask(__name__)
 bcrypt = Bcrypt(app)
 api = Api(app)
 
 CORS(app)
+CORS(app, resources={r"/*": {"origins": ["http://localhost:3000", "https://scart-xebia.onrender.com"]}}, supports_credentials=True)
 
 app.secret_key = 'some-random-string' 
 app.config["MONGO_URI"] = "mongodb+srv://kooljool:kooljool@cluster0xebia-scart.9eijce9.mongodb.net/scart"
@@ -25,6 +23,7 @@ mongo = PyMongo(app)
 
 products = mongo.db.products
 users = mongo.db.users
+
 
 login_model = api.model('Login', {
 'username': fields.String,
@@ -44,6 +43,27 @@ product_model = api.model('Product', {
 'image': fields.String,
 'discount': fields.Float,
 })
+
+def get_cipher(key):
+    return AES.new(key, AES.MODE_EAX)
+
+# this function will encrypt a message with a given cipher
+def encrypt_message(cipher, message):
+    nonce = cipher.nonce
+    return nonce + cipher.encrypt(message)
+
+@api.route('/encrypt-message')
+class EncryptMessage(Resource):
+    def get(self):
+        key = get_random_bytes(16)
+        cipher = get_cipher(key)
+
+        message = "Hello, World!"
+        encrypted_message = encrypt_message(cipher, message.encode('utf-8'))
+
+        return {'encrypted_message': encrypted_message.hex()}
+
+
 
 @api.route('/')
 class Home(Resource):

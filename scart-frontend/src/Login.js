@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import './Login.css'; // import the CSS file
 
 function Login() {
   const [username, setUsername] = useState("");
@@ -20,9 +21,8 @@ function Login() {
     }
   };
   
-
   return (
-    <div>
+    <div className="Login-form">
       <h2>Login</h2>
       <form onSubmit={handleSubmit}>
         <input
