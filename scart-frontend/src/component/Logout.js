@@ -9,7 +9,7 @@ function Logout() {
   const handleLogout = async (e) => {
     e.preventDefault();
     try {
-      const response = await axios.get("http://127.0.0.1:10000/logout");
+      const response = await axios.get("https://scart-xebia.onrender.com/logout");
 
       // If logout was successful, remove the user from local storage
       if(response.data.message === 'Logged out') {
