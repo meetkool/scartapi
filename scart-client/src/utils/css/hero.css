@@ -1,0 +1,7 @@
+.bg-img{    
+    background-image: url('../../assets/Big_phone_with_cart.jpg');
+    background-attachment: fixed;  
+    background-repeat: no-repeat; 
+    background-size: contain; 
+    background-position:right; 
+}
